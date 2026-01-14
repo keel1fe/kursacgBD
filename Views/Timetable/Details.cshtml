@@ -1,0 +1,76 @@
+﻿@model kursach.Models.Timetable
+
+@{
+    ViewBag.Title = "Детальная информация о занятии";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h2>Детальная информация</h2>
+    <hr />
+    <div>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Dayofweek)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Dayofweek)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Duration)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Duration)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.CoachID)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.CoachID)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.GroupID)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.GroupID)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Hall)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Hall)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Type)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Type)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+
+        </dl>
+    </div>
+    <p>
+        @Html.ActionLink("Редактировать", "Edit", new { id = Model.TimetableID }, new { @class = "btn btn-warning" }) |
+        @Html.ActionLink("Назад к списку", "Index", null, new { @class = "btn btn-secondary" })
+    </p>
+</div>
+

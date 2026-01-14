@@ -1,0 +1,53 @@
+﻿@model kursach.Models.Attendance
+
+@{
+    ViewBag.Title = "Удаление посещаемости";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Удаление записи</h2>
+
+<h3>Вы уверены, что хотите удалить это посещение? Назад ничего не вернешь хехе</h3>
+<div>
+    <h4>Информация о посещение:</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.IsPresent)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsPresent)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DancerID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DancerID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TimetableID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TimetableID)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Удалить
+            </button>
+            @Html.ActionLink("Отмена", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    }
+</div>
+

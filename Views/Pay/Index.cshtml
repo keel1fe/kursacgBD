@@ -1,0 +1,230 @@
+﻿@model IEnumerable<kursach.Models.Pay>
+
+@{
+    ViewBag.Title = "Платежи";
+    // Получаем роль из Session
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+}
+
+<h2>Платежи</h2>
+
+<!-- Фильтры -->
+@using (Html.BeginForm("Index", "Pay", FormMethod.Get, new { @class = "form-horizontal" }))
+{
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Фильтры</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Срок абонемента:</label>
+                        @Html.DropDownList("subscriptionFilter",
+                            new SelectList(new[] {
+                                new SelectListItem { Text = "Все абонементы", Value = "all" },
+                                new SelectListItem { Text = "Активные", Value = "active" },
+                                new SelectListItem { Text = "Истекают скоро (≤ 7 дней)", Value = "expiringSoon" },
+                                new SelectListItem { Text = "Истекшие", Value = "expired" },
+                            }, "Value", "Text", ViewBag.SubscriptionFilter),
+                            new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>С даты:</label>
+                        @Html.TextBox("fromDate", ViewBag.FromDate as string,
+                            new { @class = "form-control", type = "date" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>По дату:</label>
+                        @Html.TextBox("toDate", ViewBag.ToDate as string,
+                            new { @class = "form-control", type = "date" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Фильтровать
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Сбросить
+                    </a>
+
+                    <!-- Кнопка расчета всех абонементов -->
+                    @using (Html.BeginForm("CalculateAllSubscriptions", "Pay", FormMethod.Post, new { style = "display:inline;" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning"
+                                onclick="return confirm('Пересчитать ВСЕ абонементы?')">
+                            <i class="fas fa-calculator"></i> Пересчитать все абонементы
+                        </button>
+                    }
+
+                    @*<a href="@Url.Action("Create")" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Добавить платеж
+                    </a>*@
+                    <a href="@Url.Action("Index1", "Home")" class="btn btn-info">
+                        <i class="fas fa-home"></i> Главная страница
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Танцор</th>
+                <th>Сумма</th>
+                <th>Дата платежа</th>
+                <th>Дата окончания</th>
+                <th>Статус абонемента</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.PayID</td>
+                    <td>
+                        @if (item.Dancer != null)
+                        {
+                            <span>@item.Dancer.LastName @item.Dancer.FirstName</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Не указан</span>
+                        }
+                    </td>
+                    <td>@item.Sum.ToString("N2") ₽</td>
+                    <td>@item.PayDate.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        @if (item.Payend.HasValue)
+                        {
+                            var endDate = item.Payend.Value;
+                            var today = DateTime.Today;
+
+                            if (endDate.Date < today)
+                            {
+                                <span class="text-danger" title="Абонемент истек">
+                                    <i class="fas fa-exclamation-circle"></i> @endDate.ToString("dd.MM.yyyy")
+                                </span>
+                            }
+                            else if (endDate.Date <= today.AddDays(7))
+                            {
+                                <span class="text-warning" title="Абонемент истекает скоро">
+                                    <i class="fas fa-clock"></i> @endDate.ToString("dd.MM.yyyy")
+                                </span>
+                            }
+                            else
+                            {
+                                @endDate.ToString("dd.MM.yyyy")
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Не установлена</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            string statusBadgeClass = "";
+                            string statusText = "";
+                            string statusColor = "";
+
+                            if (!item.Payend.HasValue || item.Payend.Value == DateTime.MinValue)
+                            {
+                                statusBadgeClass = "badge-secondary";
+                                statusText = "Нет даты";
+                            }
+                            else
+                            {
+                                var endDate = item.Payend.Value.Date;
+                                var today = DateTime.Today;
+
+                                if (endDate < today)
+                                {
+                                    statusBadgeClass = "badge-danger";
+                                    statusText = "Истек";
+                                    statusColor = "#dc3545";
+                                }
+                                else if (endDate == today)
+                                {
+                                    statusBadgeClass = "badge-warning";
+                                    statusText = "Истекает сегодня";
+                                    statusColor = "#ffc107";
+                                }
+                                else if (endDate <= today.AddDays(7))
+                                {
+                                    statusBadgeClass = "badge-warning";
+                                    var daysLeft = (endDate - today).Days;
+                                    statusText = $"Осталось {daysLeft} дн.";
+                                    statusColor = "#fd7e14";
+                                }
+                                else
+                                {
+                                    statusBadgeClass = "badge-success";
+                                    statusText = "Активен";
+                                    statusColor = "#28a745";
+                                }
+                            }
+                        }
+                        <span style="color: @statusColor; font-weight: bold;">@statusText</span>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            @Html.ActionLink("Подробнее", "Details", new { id = item.PayID }, new { @class = "btn btn-info" })
+                                @Html.ActionLink("Редактировать", "Edit", new { id = item.PayID }, new { @class = "btn btn-warning" })
+                                @Html.ActionLink("Удалить", "Delete", new { id = item.PayID }, new { @class = "btn btn-danger" })
+                                using (Html.BeginForm("CalculateSingleSubscription", "Pay", new { id = item.PayID }, FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-primary" title="Рассчитать абонемент">
+                                        <i class="fas fa-calculator"></i> Рассчитать
+                                    </button>
+                                }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-3">
+        Платежи не найдены. @Html.ActionLink("Добавить первый платеж", "Create")
+    </div>
+}

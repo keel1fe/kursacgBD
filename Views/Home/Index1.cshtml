@@ -1,0 +1,157 @@
+﻿@{
+    ViewBag.Title = "Танцевальная студия - Панель управления";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var userRole = ViewBag.UserRole as string;
+    var userName = ViewBag.UserName as string;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>Добро пожаловать в систему управления танцевальной студией!</h1>
+            <p class="lead text-center mb-5">Вы вошли как: @userName </p>
+            <p>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Сменить роль
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Танцоры -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Танцоры</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Управление информацией о танцорах</p>
+                    @if (userRole == "admin")
+                    {
+                        <!-- Только админ может редактировать -->
+                        <a href="@Url.Action("Index", "Dancer")" class="btn btn-primary">Список танцоров</a>
+                        <a href="@Url.Action("Create", "Dancer")" class="btn btn-primary">Добавить танцора</a>
+                    }
+                    @if (userRole == "coach" || userRole == "dancer")
+                    {
+                        <a href="@Url.Action("Index", "Dancer")" class="btn btn-primary">Просмотр танцоров</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Тренеры -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Тренеры</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Управление тренерским составом</p>
+                    @if (userRole == "admin")
+                    {
+                        <!-- Только админ может редактировать -->
+                        <a href="@Url.Action("Index", "Coach")" class="btn btn-success">Список тренеров</a>
+                        <a href="@Url.Action("Create", "Coach")" class="btn btn-success">Добавить тренера</a>
+                    }
+                    @if (userRole == "coach" || userRole == "dancer")
+                    {
+                        <!-- только просмотр -->
+                        <a href="@Url.Action("Index", "Coach")" class="btn btn-success">Просмотр тренеров</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Группы -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Группы</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Управление учебными группами</p>
+                    @if (userRole == "admin" || userRole == "coach" || userRole == "dancer")
+                    {
+                        <!-- просмотр все -->
+                        <a href="@Url.Action("Index", "Group")" class="btn btn-warning">Просмотр групп</a>
+                    }
+                    @if (userRole == "admin" || userRole == "coach")
+                    {
+                        <a href="@Url.Action("Create", "Group")" class="btn btn-warning">Создать группу</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Расписание -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Расписание</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Планирование занятий</p>
+                    @if (userRole == "admin")
+                    {
+                        <a href="@Url.Action("Index", "Timetable")" class="btn btn-info">Просмотр расписания</a>
+                        <a href="@Url.Action("Create", "Timetable")" class="btn btn-info">Добавить занятие</a>
+                    }
+                    @if (userRole == "coach" || userRole == "dancer")
+                    {
+                        <a href="@Url.Action("Index", "Timetable")" class="btn btn-info">Просмотр расписания</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-4 mt-2">
+        <!-- Платежи -->
+        <div class="col-lg-6 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Платежи</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Финансы</p>
+                    @if (userRole == "admin")
+                    {
+                        <a href="@Url.Action("Index", "Pay")" class="btn btn-danger">Просмотр платежей</a>
+                        <a href="@Url.Action("Create", "Pay")" class="btn btn-danger">Добавить платеж</a>
+                    }
+                    @if (userRole == "coach" || userRole == "dancer")
+                    {
+                        <a href="@Url.Action("Index", "Pay")" class="btn btn-danger">Просмотр платежей</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Посещаемость -->
+        <div class="col-lg-6 col-md-6">
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Посещаемость</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Контроль посещений</p>
+                    @if (userRole == "admin" || userRole == "coach")
+                    {
+                        <!-- Админ и хореограф могут редактировать -->
+                        <a href="@Url.Action("Index", "Attendance")" class="btn btn-secondary">Просмотр посещаемости</a>
+                        <a href="@Url.Action("Create", "Attendance")" class="btn btn-secondary">Отметить посещение</a>
+                    }
+                    @if (userRole == "dancer")
+                    {
+                        <!-- Танцор только просматривает -->
+                        <a href="@Url.Action("Index", "Attendance")" class="btn btn-secondary">Просмотр посещаемости</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

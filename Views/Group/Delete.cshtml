@@ -1,0 +1,53 @@
+﻿@model kursach.Models.Group
+
+@{
+    ViewBag.Title = "Удаление группы";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Удаление записи</h2>
+
+<h3>Вы уверены, что хотите удалить эту группу?Назад ничего не вернешь хехе</h3>
+<div>
+    <h4>Информация о группе:</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.GroupName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GroupName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Level_gr)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Level_gr)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CoachID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CoachID)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Удалить
+            </button>
+            @Html.ActionLink("Отмена", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    }
+</div>
+

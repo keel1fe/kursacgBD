@@ -1,0 +1,84 @@
+﻿@model kursach.Models.Timetable
+
+@{
+    ViewBag.Title = "Удаление занятия";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Удаление записи</h2>
+
+<h3>Вы уверены, что хотите удалить это занятие?Назад ничего не вернешь хехе</h3>
+<div>
+    <h4>Информация о занятии:</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Dayofweek)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Dayofweek)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Duration)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Duration)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CoachID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CoachID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GroupID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GroupID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Hall)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Hall)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Type)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Удалить
+            </button>
+            @Html.ActionLink("Отмена", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    }
+</div>

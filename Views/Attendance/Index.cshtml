@@ -1,0 +1,296 @@
+﻿@model IEnumerable<kursach.Models.Attendance>
+
+@{
+    ViewBag.Title = "Посещаемость";
+    // Получаем роль из Session
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- Фильтры -->
+@using (Html.BeginForm("Index", "Attendance", FormMethod.Get, new { @class = "form-horizontal" }))
+{
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Фильтры</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Дата:</label>
+                        @Html.TextBox("date", ViewBag.SelectedDate as string,
+                            new { @class = "form-control", type = "date", required = "required" })
+                        <small class="text-muted">По умолчанию: сегодня</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Танцор:</label>
+                        @if (ViewBag.Dancers != null)
+                        {
+                            <select name="dancerId" class="form-control">
+                                <option value="">Все танцоры</option>
+                                @foreach (var dancer in ViewBag.Dancers)
+                                {
+                                    <option value="@dancer.DancerID"
+                                            @(ViewBag.SelectedDancerId != null && ViewBag.SelectedDancerId == dancer.DancerID ? "selected" : "")>
+                                        @dancer.FullName
+                                    </option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select name="dancerId" class="form-control">
+                                <option value="">Нет доступных танцоров</option>
+                            </select>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Фильтр
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Сбросить
+                    </a>
+                    <a href="@Url.Action("Index1", "Home")" class="btn btn-info">
+                        <i class="fas fa-home"></i> Главная страница
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Таблица с данными -->
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Танцор</th>
+                <th>Дата занятия</th>
+                <th>Присутствие</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.AttendanceID</td>
+                        <td>
+                            @if (item.Dancer != null)
+                            {
+                                <span>@item.Dancer.LastName @item.Dancer.FirstName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Не указан</span>
+                            }
+                        </td>
+                        <td>@item.AttendanceDate.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            @if (item.IsPresent)
+                            {
+                                <span class="badge badge-success" style="color: #000 !important; font-weight: normal !important;">Присутствовал</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger" style="color: #000 !important; font-weight: normal !important;">Отсутствовал</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                @Html.ActionLink("Подробнее", "Details", new { id = item.AttendanceID },
+                                    new { @class = "btn btn-info" })
+                                @if (isAdmin || isCoach)
+                                {
+                                    @Html.ActionLink("Редактировать", "Edit", new { id = item.AttendanceID },
+                                             new { @class = "btn btn-warning" })
+                                    @Html.ActionLink("Удалить", "Delete", new { id = item.AttendanceID },
+                                             new { @class = "btn btn-danger", onclick = "return confirm('Удалить запись?');" })
+                                }
+                                </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="alert alert-info mt-3">
+                            Записи о посещаемости не найдены для выбранной даты.
+                            @Html.ActionLink("Добавить первую запись", "Create")
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+@* Модальное окно для массовой отметки *@
+<div class="modal fade" id="bulkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @if (isAdmin || isCoach)
+            {
+                using (Html.BeginForm("MarkAttendance", "Attendance", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h5 class="modal-title">Массовая отметка</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Дата:</label>
+                            <input type="date" name="attendanceDate" class="form-control"
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Время занятия:</label>
+                                <input type="time" name="classTime" id="classTime" class="form-control"
+                                       value="18:00" required>
+                                <small class="text-muted">Формат: ЧЧ:ММ</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Статус:</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isPresent" value="true" checked>
+                                <label class="form-check-label">Присутствовал</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isPresent" value="false">
+                                <label class="form-check-label">Отсутствовал</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Танцоры:</label>
+                            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                                <div id="dancersList">
+                                    <!-- Список танцоров будет загружаться динамически -->
+                                    <div class="text-center text-muted py-3">
+                                        <i class="fas fa-spinner fa-spin"></i> Загрузка списка танцоров...
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllDancers">
+                                    <i class="fas fa-check-square"></i> Выбрать всех
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllDancers">
+                                    <i class="far fa-square"></i> Снять все
+                                </button>
+                                <small class="text-muted ml-2">Выбрано: <span id="selectedCount">0</span></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                    }
+                }
+            </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+
+        // Установка сегодняшней даты по умолчанию, если поле пустое
+        var dateInput = $('input[name="date"]');
+        if (!dateInput.val()) {
+            var today = new Date().toISOString().split('T')[0];
+            dateInput.val(today);
+        }
+
+        // Обработка массовой отметки
+        $('#selectAllDancers').on('click', function () {
+            $('.dancer-checkbox').prop('checked', true);
+            updateSelectedCount();
+        });
+
+        $('#deselectAllDancers').on('click', function () {
+            $('.dancer-checkbox').prop('checked', false);
+            updateSelectedCount();
+        });
+
+        $('.dancer-checkbox').on('change', function () {
+            updateSelectedCount();
+        });
+
+        function updateSelectedCount() {
+            var selectedCount = $('.dancer-checkbox:checked').length;
+            $('#selectedCount').text(selectedCount);
+        }
+
+        // Инициализация счетчика при загрузке
+        updateSelectedCount();
+
+        // Валидация формы массовой отметки
+        $('#bulkAttendanceForm').on('submit', function (e) {
+            var selectedCount = $('.dancer-checkbox:checked').length;
+            if (selectedCount === 0) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите хотя бы одного танцора!');
+                return false;
+            }
+
+            var date = $('#attendanceDate').val();
+            if (!date) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите дату!');
+                return false;
+            }
+
+            // Подтверждение
+            return confirm('Создать ' + selectedCount + ' записей о посещаемости?');
+        });
+
+        // Подтверждение удаления
+        $('.btn-danger').on('click', function () {
+            return confirm('Вы уверены, что хотите удалить эту запись о посещаемости?');
+        });
+    </script>
+}

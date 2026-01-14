@@ -1,0 +1,123 @@
+﻿@model IEnumerable<kursach.Models.Coach>
+
+@{
+    ViewBag.Title = "Тренеры";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Получаем роль из Session
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+}
+
+<div class="container">
+    <h2>Список тренеров</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="col-md-4 text-right">
+                @Html.ActionLink("На главную страницу", "Index1", "Home", userRole,
+                    new { @class = "btn btn-success" })
+            </div>
+        </div>
+        <div class="col-md-6">
+            @using (Html.BeginForm("Index", "Coach", FormMethod.Get, new { @class = "form-inline float-right" }))
+            {
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Поиск по ФИО..."
+                           value="@ViewBag.SearchTerm">
+                    <select name="specialization" class="form-control ml-2">
+                        <option value="">Все специализации</option>
+                        @if (ViewBag.Specializations != null)
+                        {
+                            foreach (var spec in ViewBag.Specializations)
+                            {
+                                <option value="@spec"
+                                        @(ViewBag.SelectedSpecialization == spec ? "selected" : "")>
+                                    @spec
+                                </option>
+                            }
+                        }
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i> Поиск
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Специализация</th>
+                    <th>Телефон</th>
+                    <th>Стаж (лет)</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CoachID</td>
+                        <td>@item.LastNameC @item.FirstNameC @item.SurnameC</td>
+                        <td>@item.Speciality</td>
+                        <td>@item.PhoneNumberC</td>
+                        <td>@item.ProfStag</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                @Html.ActionLink("Просмотреть", "Details", new { id = item.CoachID },
+                                    new { @class = "btn btn-info btn-sm" })
+                                @if (isAdmin)
+                                {
+                                    @Html.ActionLink("Редактировать", "Edit", new { id = item.CoachID },
+                                             new { @class = "btn btn-warning btn-sm" })
+                                    @Html.ActionLink("Удалить", "Delete", new { id = item.CoachID },
+                                             new { @class = "btn btn-danger btn-sm" })
+                                }
+                                </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Тренеры не найдены. @Html.ActionLink("Добавить нового тренера", "Create")
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+}

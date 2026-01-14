@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "Танцевальная студия - Выбор роли";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1>Танцевальная студия</h1>
+        <p class="lead">Выберите пользователя</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <!-- Администратор -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-center border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-shield fa-3x"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Администратор</h5>
+                    <p class="card-text">Полный доступ к системе</p>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("Index1", "Home", new { role = "admin" })"
+                       class="btn btn-primary btn-lg btn-block">Войти
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Хореограф -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-center border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-user-tie fa-3x"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Хореограф</h5>
+                    <p class="card-text">Частичный доступ к системе</p>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("Index1", "Home", new { role = "coach" })"
+                       class="btn btn-success btn-lg btn-block">Войти</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Танцор -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-center border-warning h-100">
+                <div class="card-header bg-warning text-white">
+                    <i class="fas fa-user fa-3x"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Танцор</h5>
+                    <p class="card-text">Только просмотр данных</p>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("Index1", "Home", new { role = "dancer" })"
+                       class="btn btn-warning btn-lg btn-block">Войти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

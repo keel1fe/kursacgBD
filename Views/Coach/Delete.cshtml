@@ -1,0 +1,75 @@
+﻿@model kursach.Models.Coach
+
+@{
+    ViewBag.Title = "Удаление тренера";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Удаление записи</h2>
+
+<h1>Вы уверены, что хотите удалить этого тренера? Назад ничего не вернешь хехе</h1>
+<div>
+    <h4>Информация о тренере:</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.LastNameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastNameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstNameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FirstNameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SurnameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SurnameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Speciality)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Speciality)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PhoneNumberC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PhoneNumberC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ProfStag)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProfStag)
+        </dd>
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Удалить
+            </button>
+            @Html.ActionLink("Отмена", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    }
+</div>

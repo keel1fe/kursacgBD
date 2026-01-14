@@ -1,0 +1,81 @@
+﻿@model kursach.Models.Coach
+
+@{
+    ViewBag.Title = "Детальная информация о тренере";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    // Получаем роль из Session
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+}
+
+<div class="container">
+    <h2>Детальная информация</h2>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.LastNameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastNameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstNameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FirstNameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SurnameC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SurnameC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Speciality)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Speciality)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PhoneNumberC)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PhoneNumberC)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ProfStag)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProfStag)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FullName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @if (isAdmin || isCoach)
+    {
+        @Html.ActionLink("Редактировать", "Edit", new { id = Model.CoachID }, new { @class = "btn btn-warning" }) 
+    }
+        @Html.ActionLink("Назад к списку", "Index", null, new { @class = "btn btn-secondary" })
+</p>

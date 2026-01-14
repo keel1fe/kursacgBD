@@ -1,0 +1,44 @@
+﻿@model kursach.Models.Attendance
+@{
+    ViewBag.Title = "Детальная информация о посещении";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h2>Детальная информация</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.IsPresent)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.IsPresent)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.DancerID)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.DancerID)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.TimetableID)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.TimetableID)
+                </dd>
+
+            </dl>
+        </div>
+        <p>
+            @Html.ActionLink("Редактировать", "Edit", new { id = Model.DancerID }, new { @class = "btn btn-warning" }) |
+            @Html.ActionLink("Назад к списку", "Index", null, new { @class = "btn btn-secondary" })
+        </p>
+    </div>
+</div>

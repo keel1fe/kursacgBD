@@ -1,0 +1,136 @@
+﻿@model kursach.Models.Group
+
+@{
+    ViewBag.Title = "Управление танцорами в группе";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Получаем роль пользователя
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+
+    // Для проверки доступности танцоров
+    var allDancersList = ViewBag.AllDancersList as List<kursach.Models.Dancer>;
+}
+
+<div class="container">
+    <h2>Управление танцорами в группе: @Model.GroupName</h2>
+    <h4>Тренер: @Model.Coach.FullName</h4>   
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Танцоры в группе -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5>Танцоры в группе</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.DancerGroups.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var dancerGroup in Model.DancerGroups.OrderBy(dg => dg.Dancer.LastName))
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@dancerGroup.Dancer.LastName @dancerGroup.Dancer.FirstName</strong>
+                                        <br />
+                                        <small class="text-muted">@dancerGroup.Dancer.PhoneNumber</small>
+                                    </div>
+                                    @if (isAdmin || isCoach)
+                                    {
+                                        <div>
+                                            @using (Html.BeginForm("RemoveDancerFromGroup", "Group", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="groupId" value="@Model.GroupID" />
+                                                <input type="hidden" name="dancerId" value="@dancerGroup.DancerID" />
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('Удалить танцора из группы?')">
+                                                    <i class="fas fa-user-minus"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">В группе пока нет танцоров</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Доступные танцоры -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Доступные танцоры</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var allDancers = ViewBag.AllDancers as List<kursach.Models.Dancer>;
+                    }
+
+                    @if (allDancers != null && allDancers.Any() && (isAdmin || isCoach))
+                    {
+                        <ul class="list-group">
+                            @foreach (var dancer in allDancers)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        @dancer.FullName
+                                        <br />
+                                    </div>
+                                    <div>
+                                        @using (Html.BeginForm("AddDancerToGroup", "Group", FormMethod.Post))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="groupId" value="@Model.GroupID" />
+                                            <input type="hidden" name="dancerId" value="@dancer.DancerID" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fas fa-user-plus"></i> Добавить
+                                            </button>
+                                        }
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Нет доступных танцоров для добавления</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        @Html.ActionLink("Вернуться к списку групп", "Index", null, new { @class = "btn btn-secondary" })
+        @Html.ActionLink("Расписание группы", "Index", "Timetable", new { groupId = Model.GroupID }, new { @class = "btn btn-info" })
+    </div>
+</div>

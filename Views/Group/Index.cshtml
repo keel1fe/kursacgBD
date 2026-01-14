@@ -1,0 +1,119 @@
+﻿@model IEnumerable<kursach.Models.Group>
+
+@{
+    ViewBag.Title = "Группы";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Получаем роль из Session
+    var userRole = Session["UserRole"]?.ToString() ?? "";
+    var isAdmin = userRole == "admin";
+    var isCoach = userRole == "coach";
+    var isDancer = userRole == "dancer";
+}
+
+<div class="container">
+    <h2>Список групп</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="col-md-4 text-right">
+                @Html.ActionLink("На главную страницу", "Index1", "Home", null,
+                    new { @class = "btn btn-success" })
+            </div>
+        </div>
+        <div class="col-md-6">
+            @using (Html.BeginForm("Index", "Group", FormMethod.Get, new { @class = "form-inline float-right" }))
+            {
+                <div class="input-group">
+                    <select name="level" class="form-control">
+                        <option value="">Все уровни</option>
+                        <option value="Начинающий" @(ViewBag.SelectedLevel == "Начинающий" ? "selected" : "")>Начинающий</option>
+                        <option value="Средний" @(ViewBag.SelectedLevel == "Средний" ? "selected" : "")>Средний</option>
+                        <option value="Продвинутый" @(ViewBag.SelectedLevel == "Продвинутый" ? "selected" : "")>Продвинутый</option>
+                        <option value="Профессиональный" @(ViewBag.SelectedLevel == "Профессиональный" ? "selected" : "")>Профессиональный</option>
+                    </select>
+                    <select name="coachId" class="form-control ml-2">
+                        <option value="">Все тренеры</option>
+                        @foreach (var coach in ViewBag.Coaches)
+                        {
+                            <option value="@coach.CoachID"
+                                    @(ViewBag.SelectedCoachId == coach.CoachID ? "selected" : "")>
+                                @coach.LastNameC @coach.FirstNameC
+                            </option>
+                        }
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-filter"></i> Фильтровать
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Название группы</th>
+                    <th>Уровень</th>
+                    <th>Тренер</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.GroupName</td>
+                        <td>
+                            <span class="badge
+                                @(item.Level_gr == "Начинающий" ? "badge-primary" :
+                                  item.Level_gr == "Средний" ? "badge-info" :
+                                  item.Level_gr == "Продвинутый" ? "badge-warning" :
+                                  "badge-danger")" style="color: #000 !important; font-weight: normal !important;">
+                                @item.Level_gr
+                            </span>
+                        </td>
+                        <td>@Html.DisplayFor(modelItem => item.Coach.FullName)</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                @if (isAdmin || isCoach)
+                                {
+                                    @Html.ActionLink("Редактировать", "Edit", new { id = item.GroupID },
+                                             new { @class = "btn btn-warning btn-sm" })
+                                    @Html.ActionLink("Удалить", "Delete", new { id = item.GroupID },
+                                            new { @class = "btn btn-danger btn-sm" })
+                                }
+                                @Html.ActionLink("Участники", "ManageDancers", new { id = item.GroupID },
+                                    new { @class = "btn btn-secondary btn-sm" })
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Группы не найдены. @Html.ActionLink("Создать группу", "Create")
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+}
